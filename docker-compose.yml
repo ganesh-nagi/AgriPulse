@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgis/postgis:17-3.4-alpine
+    environment:
+      POSTGRES_DB: agripulse
+      POSTGRES_USER: agripulse
+      POSTGRES_PASSWORD: agripulse
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+volumes: { pgdata: {} }

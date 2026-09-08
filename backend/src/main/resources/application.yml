@@ -1,0 +1,17 @@
+server.port: 8080
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/agripulse}
+    username: ${DATABASE_USERNAME:agripulse}
+    password: ${DATABASE_PASSWORD:agripulse}
+  jpa:
+    hibernate.ddl-auto: validate
+    show-sql: false
+  flyway.enabled: true
+app.jwt.secret: ${JWT_SECRET:change-me-to-64-char-random-hex-for-dev-only-do-not-use-in-prod-0123456789abcdef}
+app.jwt.expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+app.jwt.refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+app.auth.max-failed-attempts: 5
+app.auth.lock-minutes: 15
+app.rate-limit.max-requests: 20
+app.rate-limit.window-ms: 60000
