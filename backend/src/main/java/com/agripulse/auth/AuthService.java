@@ -32,9 +32,8 @@ public class AuthService {
   private final JwtService jwtService;
   private final TokenDenylist tokenDenylist;
   private final AuditService auditService;
+  private final LoginAttemptService loginAttemptService;
   private final long refreshExpirationMs;
-  private final int maxFailedAttempts;
-  private final long lockMinutes;
 
   public AuthService(
       UserRepository users,
@@ -43,18 +42,16 @@ public class AuthService {
       JwtService jwtService,
       TokenDenylist tokenDenylist,
       AuditService auditService,
-      @Value("${app.jwt.refresh-expiration-ms:604800000}") long refreshExpirationMs,
-      @Value("${app.auth.max-failed-attempts:5}") int maxFailedAttempts,
-      @Value("${app.auth.lock-minutes:15}") long lockMinutes) {
+      LoginAttemptService loginAttemptService,
+      @Value("${app.jwt.refresh-expiration-ms:604800000}") long refreshExpirationMs) {
     this.users = users;
     this.refreshTokens = refreshTokens;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.tokenDenylist = tokenDenylist;
     this.auditService = auditService;
+    this.loginAttemptService = loginAttemptService;
     this.refreshExpirationMs = refreshExpirationMs;
-    this.maxFailedAttempts = maxFailedAttempts;
-    this.lockMinutes = lockMinutes;
   }
 
   @Transactional
@@ -83,15 +80,13 @@ public class AuthService {
     return toResponse(user, refreshToken);
   }
 
-  @Transactional
+  @Transactional(noRollbackFor = IllegalArgumentException.class)
   public AuthResponse login(LoginRequest request) {
     String email = request.getEmail().trim().toLowerCase();
     User user = users.findByEmail(email).orElse(null);
     if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-      if (user != null) {
-        registerFailedAttempt(user);
-      }
-      auditService.record(null, "LOGIN_FAILED", "User", email, null);
+      Long userId = user != null ? user.getId() : null;
+      loginAttemptService.recordFailure(userId, email);
       throw new IllegalArgumentException("Invalid email or password");
     }
     ensureUsable(user);
@@ -171,17 +166,6 @@ public class AuthService {
       user.setAccountStatus(AccountStatus.ACTIVE);
       user.setFailedLoginAttempts(0);
       user.setLockedUntil(null);
-    }
-  }
-
-  private void registerFailedAttempt(User user) {
-    int attempts = user.getFailedLoginAttempts() + 1;
-    user.setFailedLoginAttempts(attempts);
-    if (attempts >= maxFailedAttempts) {
-      user.setAccountStatus(AccountStatus.LOCKED);
-      user.setLockedUntil(LocalDateTime.now().plusMinutes(lockMinutes));
-      auditService.record(
-          user.getId(), "ACCOUNT_LOCKED", "User", String.valueOf(user.getId()), null);
     }
   }
 

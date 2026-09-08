@@ -34,7 +34,7 @@ public class LoginAttemptService {
     this.lockMinutes = lockMinutes;
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @Transactional(propagation = Propagation.REQUIRED)
   public void recordFailure(Long userId, String emailForAudit) {
     if (userId != null) {
       users
