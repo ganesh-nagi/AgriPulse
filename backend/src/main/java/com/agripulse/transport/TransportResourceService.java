@@ -29,6 +29,14 @@ public class TransportResourceService {
   @Transactional
   public TransportResponse create(CreateTransportRequest request, String email) {
     User owner = transporterOf(email);
+    if (request.getCapacityTonnes() < 0) {
+      throw new IllegalArgumentException("Transport capacity cannot be negative");
+    }
+    if (request.getAvailableFrom() != null
+        && request.getAvailableTo() != null
+        && request.getAvailableFrom().isAfter(request.getAvailableTo())) {
+      throw new IllegalArgumentException("availableFrom must be on or before availableTo");
+    }
     TransportResource resource = new TransportResource();
     resource.setOwner(owner);
     resource.setCapacityTonnes(request.getCapacityTonnes());
@@ -37,6 +45,7 @@ public class TransportResourceService {
     resource.setOriginRegion(request.getOriginRegion().trim());
     resource.setDestRegion(request.getDestRegion());
     resource.setCostPerKm(request.getCostPerKm());
+    resource.setTravelEstimateDays(request.getTravelEstimateDays());
     resource.setStatus(TransportStatus.AVAILABLE);
     resources.save(resource);
     auditService.record(

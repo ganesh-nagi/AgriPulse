@@ -53,4 +53,9 @@ public class SupplyReportController {
       Principal principal) {
     return supplyReportService.updateOwn(id, request, principal.getName());
   }
+
+  @PostMapping("/{id}/cancel")
+  public SupplyReportResponse cancelOwn(@PathVariable Long id, Principal principal) {
+    return supplyReportService.cancelOwn(id, principal.getName());
+  }
 }

@@ -18,8 +18,20 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+const SESSION_KEYS = ['agripulse.token', 'agripulse.refresh', 'agripulse.email', 'agripulse.role']
+
+/** Expired/revoked access token: drop the dead session so route guards redirect to login. */
+function clearExpiredSession(): void {
+  SESSION_KEYS.forEach((k) => localStorage.removeItem(k))
+  const path = window.location.pathname
+  if (path !== '/login' && path !== '/register') {
+    window.location.assign('/login')
+  }
+}
+
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
+    if (res.status === 401) clearExpiredSession()
     let message = `Request failed (${res.status})`
     try {
       const body = await res.json()
@@ -61,6 +73,34 @@ export async function apiPut<T>(path: string, body: unknown): Promise<T> {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
+  })
+  return handle<T>(res)
+}
+
+export async function apiDelete<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'DELETE',
+    headers: { ...authHeaders() },
+  })
+  return handle<T>(res)
+}
+
+export async function apiPostForm<T>(
+  path: string,
+  body: FormData,
+): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${localStorage.getItem('agripulse.token') ?? ''}` },
+    body,
+  })
+  return handle<T>(res)
+}
+
+export async function apiPostCancel<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
   })
   return handle<T>(res)
 }

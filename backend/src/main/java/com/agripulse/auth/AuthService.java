@@ -131,10 +131,7 @@ public class AuthService {
     refreshTokens.findByUserIdAndRevokedFalse(user.getId()).forEach(t -> t.setRevoked(true));
     jwtService
         .validateAndExtractIdentity(accessToken)
-        .ifPresent(
-            identity ->
-                tokenDenylist.deny(
-                    identity.jti(), System.currentTimeMillis() + 86_400_000L));
+        .ifPresent(identity -> tokenDenylist.deny(identity.jti(), identity.expiresAtMs()));
     auditService.record(
         user.getId(), "USER_LOGOUT", "User", String.valueOf(user.getId()), null);
   }

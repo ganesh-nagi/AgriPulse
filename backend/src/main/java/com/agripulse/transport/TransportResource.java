@@ -43,6 +43,10 @@ public class TransportResource extends BaseEntity {
   @Column(name = "cost_per_km")
   private Double costPerKm;
 
+  /** Optional planner hint; null means unknown. */
+  @Column(name = "travel_estimate_days")
+  private Double travelEstimateDays;
+
   public User getOwner() {
     return owner;
   }
@@ -105,5 +109,13 @@ public class TransportResource extends BaseEntity {
 
   public void setCostPerKm(Double costPerKm) {
     this.costPerKm = costPerKm;
+  }
+
+  public Double getTravelEstimateDays() {
+    return travelEstimateDays;
+  }
+
+  public void setTravelEstimateDays(Double travelEstimateDays) {
+    this.travelEstimateDays = travelEstimateDays;
   }
 }

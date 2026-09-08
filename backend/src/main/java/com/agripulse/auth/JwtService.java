@@ -44,17 +44,21 @@ public class JwtService {
         .compact();
   }
 
-  /** Validated token identity: subject email plus token id (for logout). */
-  public record TokenIdentity(String email, String jti) {}
+  /** Validated token identity: subject email, token id and expiry (for logout). */
+  public record TokenIdentity(String email, String jti, long expiresAtMs) {}
 
   /** Returns the identity when the token is valid, empty otherwise. */
   public Optional<TokenIdentity> validateAndExtractIdentity(String token) {
     try {
       var payload = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
-      if (payload.getSubject() == null || payload.getId() == null) {
+      if (payload.getSubject() == null
+          || payload.getId() == null
+          || payload.getExpiration() == null) {
         return Optional.empty();
       }
-      return Optional.of(new TokenIdentity(payload.getSubject(), payload.getId()));
+      return Optional.of(
+          new TokenIdentity(
+              payload.getSubject(), payload.getId(), payload.getExpiration().getTime()));
     } catch (JwtException | IllegalArgumentException ex) {
       return Optional.empty();
     }

@@ -29,6 +29,14 @@ public class StorageFacilityService {
   @Transactional
   public StorageResponse create(CreateStorageRequest request, String email) {
     User operator = operatorOf(email);
+    if (request.getCapacityTonnes() < 0) {
+      throw new IllegalArgumentException("Total capacity cannot be negative");
+    }
+    if (request.getAvailableFrom() != null
+        && request.getAvailableTo() != null
+        && request.getAvailableFrom().isAfter(request.getAvailableTo())) {
+      throw new IllegalArgumentException("availableFrom must be on or before availableTo");
+    }
     StorageFacility facility = new StorageFacility();
     facility.setName(request.getName().trim());
     facility.setRegion(request.getRegion().trim());
@@ -62,6 +70,9 @@ public class StorageFacilityService {
       Long facilityId, UpdateOccupancyRequest request, String email) {
     User operator = operatorOf(email);
     StorageFacility facility = ownedFacility(facilityId, operator);
+    if (request.getOccupiedTonnes() < 0) {
+      throw new IllegalArgumentException("Occupied capacity cannot be negative");
+    }
     if (request.getOccupiedTonnes() > facility.getCapacityTonnes()) {
       throw new IllegalArgumentException("Occupied capacity cannot exceed total capacity");
     }

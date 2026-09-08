@@ -19,6 +19,7 @@ public class SupplyReportResponse {
   private final String region;
   private final ReportStatus status;
   private final double trustScore;
+  private final String trustLevel;
 
   public SupplyReportResponse(
       Long id,
@@ -31,7 +32,8 @@ public class SupplyReportResponse {
       String quality,
       String region,
       ReportStatus status,
-      double trustScore) {
+      double trustScore,
+      String trustLevel) {
     this.id = id;
     this.farmId = farmId;
     this.cropName = cropName;
@@ -43,6 +45,7 @@ public class SupplyReportResponse {
     this.region = region;
     this.status = status;
     this.trustScore = trustScore;
+    this.trustLevel = trustLevel;
   }
 
   public Long getId() {
@@ -87,5 +90,9 @@ public class SupplyReportResponse {
 
   public double getTrustScore() {
     return trustScore;
+  }
+
+  public String getTrustLevel() {
+    return trustLevel;
   }
 }

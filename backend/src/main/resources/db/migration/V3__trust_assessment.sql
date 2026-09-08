@@ -1,0 +1,2 @@
+ALTER TABLE trust_scores ADD COLUMN level VARCHAR(32);
+ALTER TABLE trust_scores ADD COLUMN requires_review BOOLEAN NOT NULL DEFAULT FALSE;

@@ -5,5 +5,6 @@ public enum ReportStatus {
   DRAFT,
   SUBMITTED,
   VALIDATED,
-  REJECTED
+  REJECTED,
+  CANCELLED
 }

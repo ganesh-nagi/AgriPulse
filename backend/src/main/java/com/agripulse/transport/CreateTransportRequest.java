@@ -18,6 +18,8 @@ public class CreateTransportRequest {
 
   private Double costPerKm;
 
+  private Double travelEstimateDays;
+
   public double getCapacityTonnes() {
     return capacityTonnes;
   }
@@ -64,5 +66,13 @@ public class CreateTransportRequest {
 
   public void setCostPerKm(Double costPerKm) {
     this.costPerKm = costPerKm;
+  }
+
+  public Double getTravelEstimateDays() {
+    return travelEstimateDays;
+  }
+
+  public void setTravelEstimateDays(Double travelEstimateDays) {
+    this.travelEstimateDays = travelEstimateDays;
   }
 }
